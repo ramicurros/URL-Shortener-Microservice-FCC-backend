@@ -2,7 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const bodyParser = require('body-parsernpm install body-parser')
+const bodyParser = require('body-parser')
 
 // Basic Configuration
 const port = process.env.PORT || 3000;
@@ -20,7 +20,8 @@ app.get('/', function (req, res) {
 // Your first API endpoint
 app.route('/api/shorturl')
   .get((req, res, next) => {
-     url = req.url;
+    url = req.url;
+    randomHash = ''
     let characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
     let counter = 0;
     while (counter < length) {
@@ -28,11 +29,11 @@ app.route('/api/shorturl')
       counter += 1;
     }
     next();
-  }, (req, res => {
+  }, (req, res) => {
     res.json({ original_url: url, short_url: randomHash });
-  }))
+  })
   .post((req, res) => {
-    res.json({ original_url: req.body.url, short_url: req.body.randomHash });
+    res.json({ original_url: req.body.url, short_url: randomHash });
   });
 
 app.listen(port, function () {
