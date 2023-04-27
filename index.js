@@ -41,7 +41,8 @@ app.route('/api/shorturl')
 
 app.route('/api/shorturl').post((req, res) => {
   let link = req.body.url;
-  let randomHash = ''
+  req.body.randomHash = ''
+  let randomHash = req.body.randomHash;
   let characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
   let counter = 0;
   let length = Math.floor(Math.random() * 10) + 1;
@@ -49,7 +50,7 @@ app.route('/api/shorturl').post((req, res) => {
     randomHash += characters.charAt(Math.floor(Math.random() * characters.length));
     counter += 1;
   }
-  res.json({ original_url: req.body.url, short_url: randomHash });
+  res.json({ original_url: link, short_url: randomHash });
 });
 
 app.listen(port, function() {
