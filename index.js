@@ -2,8 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const app = express();
-const bodyParser = require('body-parser')
-
+const bodyParser = require('body-parser');
+const dns = require("dns");
+const url = require('url');
 // Basic Configuration
 const port = process.env.PORT || 3000;
 
@@ -18,11 +19,10 @@ app.get('/', function(req, res) {
 });
 
 // Your first API endpoint
-/*
-app.route('/api/shorturl')
-  .get((req, res, next) => {
-    link = req.url;
-    randomHash = ''
+
+app.route('/api/shorturl').post((req, res) => {
+    const parsedUrl = url.parse(req.body.url);
+    let randomHash = ''
     let characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
     let counter = 0;
     let length = Math.floor(Math.random() * 10) + 1;
@@ -30,28 +30,16 @@ app.route('/api/shorturl')
       randomHash += characters.charAt(Math.floor(Math.random() * characters.length));
       counter += 1;
     }
-    next();
-  }, (req, res) => {
-    res.json({ original_url: link, short_url: randomHash });
-  })
+  req.body.randomHash = randomHash;
+    dns.lookup(parsedUrl.hostname, (error, address, family) => {
+      if (error) {
+        res.json({error: 'invalid url'});
+      } else {
+        res.json({ original_url: req.body.url, short_url: req.body.randomHash });
+      }
+    });
+  });
 
-.post((req, res) => {
-  res.json({ original_url: req.body.url, short_url: req.body.randomHash });
-}); */
-
-app.route('/api/shorturl').post((req, res) => {
-  let link = req.body.url;
-  req.body.randomHash = ''
-  let randomHash = req.body.randomHash;
-  let characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
-  let counter = 0;
-  let length = Math.floor(Math.random() * 10) + 1;
-  while (counter < length) {
-    randomHash += characters.charAt(Math.floor(Math.random() * characters.length));
-    counter += 1;
-  }
-  res.json({ original_url: link, short_url: randomHash });
-});
 
 app.listen(port, function() {
   console.log(`Listening on port ${port}`);
