@@ -10,7 +10,7 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 const port = process.env.PORT || 3000;
 
-mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(process.env['MONGO_URI'], { useNewUrlParser: true, useUnifiedTopology: true });
 
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -18,7 +18,7 @@ app.use(cors());
 
 app.use('/public', express.static(`${process.cwd()}/public`));
 
-app.get('/', function (req, res) {
+app.get('/', function(req, res) {
   res.sendFile(process.cwd() + '/views/index.html');
 });
 
@@ -37,9 +37,9 @@ const dataSave = async (url, shortUrl) => {
   console.log(`output ${output}`);
 }
 
-async function getUrl(shortUrl){
+async function getUrl(shortUrl) {
   console.log(`shortUrl ${shortUrl}`);
-  const item = await UrlData.findOne({short_url: shortUrl});
+  const item = await UrlData.findOne({ short_url: shortUrl });
   console.log(`item ${item}`);
   return item;
 }
@@ -48,6 +48,7 @@ async function getUrl(shortUrl){
 
 app.route('/api/shorturl').post((req, res) => {
   const parsedUrl = url.parse(req.body.url);
+  console.log(`parsedUrl ${parsedUrl.hostname}`);
   let randomHash = ''
   let characters = 'abcdefghijklmnopqrstuvwxyz0123456789'
   let counter = 0;
@@ -57,6 +58,7 @@ app.route('/api/shorturl').post((req, res) => {
     counter += 1;
   }
   req.body.randomHash = randomHash;
+  if (!parsedUrl.hostname) res.json({ error: 'invalid url' })
   dns.lookup(parsedUrl.hostname, (error, address, family) => {
     if (error) {
       res.json({ error: 'invalid url' });
@@ -68,13 +70,13 @@ app.route('/api/shorturl').post((req, res) => {
 });
 
 app.get('/api/shorturl/:short_url', async (req, res) => {
-    console.log(`param ${req.params.short_url}`);
-    const redirect = await getUrl(req.params.short_url);
-    console.log(`redirect ${redirect}`);
-    if(!redirect.original_url)res.status(404);
-    res.redirect(redirect.original_url);
+  console.log(`param ${req.params.short_url}`);
+  const redirect = await getUrl(req.params.short_url);
+  console.log(`redirect ${redirect}`);
+  if (!redirect.original_url) res.status(404);
+  res.redirect(redirect.original_url);
 });
 
-app.listen(port, function () {
+app.listen(port, function() {
   console.log(`Listening on port ${port}`);
 });
