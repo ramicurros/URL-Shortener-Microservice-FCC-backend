@@ -29,14 +29,19 @@ const urlDataSchema = new Schema({
 
 let UrlData = mongoose.model('Url_Data', urlDataSchema);
 
-let savedData;
 
-const dataSave = (url, shortUrl) => {
-  savedData = new UrlData({ original_url: url, short_url: shortUrl });
-  savedData.save((err, data) => {
-    if (err) return console.error(err);
-    done(null, data);
-  });
+const dataSave = async (url, shortUrl) => {
+  const savedData = new UrlData({ original_url: url, short_url: shortUrl });
+  let output;
+  output = await savedData.save();
+  console.log(`output ${output}`);
+}
+
+async function getUrl(shortUrl){
+  console.log(`shortUrl ${shortUrl}`);
+  const item = await UrlData.findOne({short_url: shortUrl});
+  console.log(`item ${item}`);
+  return item;
 }
 
 // Your first API endpoint
@@ -62,12 +67,12 @@ app.route('/api/shorturl').post((req, res) => {
   });
 });
 
-app.get('/api/shorturl/<short_url>', (req, res) => {
-  const redirect = UrlData.find({ short_url: req.params.short_url }, (err, data) => {
-    if (err) return console.error(err);
-    done(null, data);
-  });
-    res.redirect(redirect);
+app.get('/api/shorturl/:short_url', async (req, res) => {
+    console.log(`param ${req.params.short_url}`);
+    const redirect = await getUrl(req.params.short_url);
+    console.log(`redirect ${redirect}`);
+    if(!redirect.original_url)res.status(404);
+    res.redirect(redirect.original_url);
 });
 
 app.listen(port, function () {
